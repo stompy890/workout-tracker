@@ -905,10 +905,11 @@ main {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 0.7rem;
-    padding: 8px 12px;
+    font-size: 0.65rem;
+    padding: 8px 6px;
     cursor: pointer;
     transition: color 0.2s;
+    min-width: 0;
 }
 
 .nav-item.active {
@@ -1041,4 +1042,105 @@ main {
     main {
         padding-bottom: calc(var(--nav-height) + max(16px, env(safe-area-inset-bottom)));
     }
+}
+
+/* History View */
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.history-card {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.history-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.history-card-header:active {
+    background: var(--bg-tertiary);
+}
+
+.history-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-card-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-card-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.history-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.history-chevron {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.history-card-detail {
+    border-top: 1px solid var(--border-color);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.history-card-detail.hidden {
+    display: none;
+}
+
+.history-exercise {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.history-exercise-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-secondary);
+}
+
+.history-set-row {
+    display: flex;
+    gap: 12px;
+    font-size: 0.85rem;
+    padding-left: 8px;
+}
+
+.history-set-num {
+    color: var(--text-muted);
+    min-width: 42px;
+}
+
+.history-set-detail {
+    color: var(--text-secondary);
 }

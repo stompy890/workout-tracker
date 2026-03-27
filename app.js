@@ -328,6 +328,7 @@ function navigateTo(view) {
         dashboard: 'Dashboard',
         plan: 'Workout Plans',
         workout: 'Workout',
+        history: 'Workout History',
         progress: 'Progress',
         prs: 'Personal Records',
         exercises: 'Exercises',
@@ -356,6 +357,9 @@ async function refreshView(view) {
             break;
         case 'workout':
             await renderActiveWorkout();
+            break;
+        case 'history':
+            await renderHistory();
             break;
         case 'progress':
             await populateProgressExercises();
@@ -1275,6 +1279,72 @@ async function savePastSession() {
     }
 
     navigateTo('dashboard');
+}
+
+// ==================== HISTORY ====================
+
+async function renderHistory() {
+    const [sessions, exercises] = await Promise.all([getSessions(), getExercises()]);
+    const container = document.getElementById('history-list');
+
+    if (sessions.length === 0) {
+        container.innerHTML = '<p class="empty-state">No sessions logged yet.</p>';
+        return;
+    }
+
+    container.innerHTML = sessions.map(session => {
+        const volume = (session.exercises || []).reduce((sum, ex) =>
+            sum + (ex.sets || []).reduce((s, set) => s + ((set.weight || 0) * (set.reps || 0)), 0), 0);
+        const totalSets = (session.exercises || []).reduce((sum, ex) => sum + (ex.sets || []).length, 0);
+        const durationStr = session.duration ? formatDuration(session.duration) : null;
+
+        const exercisesHtml = (session.exercises || []).map(ex => {
+            const exercise = exercises.find(e => e.id === ex.exerciseId);
+            const setsHtml = (ex.sets || []).map((set, i) =>
+                `<div class="history-set-row">
+                    <span class="history-set-num">Set ${i + 1}</span>
+                    <span class="history-set-detail">${set.reps} reps @ ${set.weight} lbs</span>
+                </div>`
+            ).join('');
+            return `
+                <div class="history-exercise">
+                    <div class="history-exercise-name">${exercise?.name || ex.exerciseId}</div>
+                    ${setsHtml}
+                </div>`;
+        }).join('');
+
+        return `
+            <div class="history-card" id="hcard-${session.id}">
+                <div class="history-card-header" onclick="toggleSessionDetail('${session.id}')">
+                    <div class="history-card-info">
+                        <h3>${session.name}</h3>
+                        <span class="history-card-meta">${formatDate(session.date)}${durationStr ? ' · ' + durationStr : ''} · ${totalSets} sets · ${formatNumber(volume)} lbs</span>
+                    </div>
+                    <div class="history-card-actions">
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteSession('${session.id}')">Delete</button>
+                        <span class="history-chevron">▾</span>
+                    </div>
+                </div>
+                <div class="history-card-detail hidden">
+                    ${exercisesHtml}
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function toggleSessionDetail(sessionId) {
+    const card = document.getElementById(`hcard-${sessionId}`);
+    const detail = card.querySelector('.history-card-detail');
+    const chevron = card.querySelector('.history-chevron');
+    const isHidden = detail.classList.toggle('hidden');
+    chevron.textContent = isHidden ? '▾' : '▴';
+}
+
+async function deleteSession(sessionId) {
+    if (!confirm('Delete this session? This cannot be undone.')) return;
+    await db.collection('users').doc(currentUser.uid).collection('sessions').doc(sessionId).delete();
+    await renderHistory();
+    showToast('Session deleted', 'success');
 }
 
 // ==================== PROGRESS ====================
