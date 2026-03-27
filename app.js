@@ -192,6 +192,8 @@ async function getExercises() {
         exercisesCache = snapshot.docs.map(doc => doc.data());
     }
 
+    exercisesCache.sort((a, b) => a.name.localeCompare(b.name));
+
     return exercisesCache;
 }
 
